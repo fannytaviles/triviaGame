@@ -122,22 +122,37 @@ local function onAnswerTouched(event)
                 target.x > (currentSlot.x - currentSlot.contentWidth * 0.5) and
                 target.y < (currentSlot.y + currentSlot.contentHeight * 0.5) and
                 target.y > (currentSlot.y - currentSlot.contentHeight * 0.5) then
-                    if currentSlot.isEmpty then
-                            currentSlot.alpha = 0
+                    if currentSlot.isEmpty then 
                             currentAnswer = target.char
                             currentSlot.isEmpty = false
                             target.onSlot = true
                             target.slot = currentSlot
                     end
-            else
+            end
+
+            if currentSlot.isEmpty then
+                currentAnswer = ""
                 currentSlot.alpha = 0.5
+            else
+                currentSlot.alpha = 0
             end
 
             if target.slot then
-                transition.to(target, {time = 200, x = target.slot.x, y = target.slot.y, xScale = 0.7, yScale = 0.7})
+                transition.to(target, {time = 200, x = target.slot.x, y = target.slot.y, xScale = 0.7, yScale = 0.7, 
+                    onStart = function() 
+                        dragEnabled = false 
+                    end, 
+                    onComplete = function() 
+                        dragEnabled = true 
+                    end})
             else
-                currentAnswer = ""
-                transition.to(target, {time = 500, x = target.initX, y = target.initY, xScale = 0.9, yScale = 0.9})
+                transition.to(target, {time = 500, x = target.initX, y = target.initY, xScale = 0.9, yScale = 0.9, 
+                    onStart = function() 
+                        dragEnabled = false 
+                    end,
+                    onComplete = function() 
+                        dragEnabled = true 
+                    end})
             end
             display.getCurrentStage():setFocus( nil )
         end
