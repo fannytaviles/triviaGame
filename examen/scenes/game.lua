@@ -98,66 +98,67 @@ local function onAnswerTouched(event)
     if dragEnabled then
         local phase = event.phase
         local target = event.target
-        if phase == "began" then
-            transition.cancel(target)
-            target:toFront( )
-            target.x = event.x
-            target.y = event.y
-            target.onSlot = false
-            if target.slot then
-                target.slot.isEmpty = true
-                target.slot = nil
-            end
-            display.getCurrentStage():setFocus( event.target )
-            target.isMoving = true
-        elseif phase == "moved" then
-            if target.isMoving then
+        if target.tapsEnabled then
+            if phase == "began" then
+                transition.cancel(target)
+                target:toFront( )
                 target.x = event.x
-                target.y = event.y		
-            end
-        elseif phase == "ended" then
-            local musicPopPlay = audio.play(musicPop, {channel = 2, loops = 0 })
-            local currentSlot = answerGroup
-            if target.x < (currentSlot.x + currentSlot.contentWidth * 0.5) and
-                target.x > (currentSlot.x - currentSlot.contentWidth * 0.5) and
-                target.y < (currentSlot.y + currentSlot.contentHeight * 0.5) and
-                target.y > (currentSlot.y - currentSlot.contentHeight * 0.5) then
-                    if currentSlot.isEmpty then 
-                            currentAnswer = target.char
-                            currentSlot.isEmpty = false
-                            target.onSlot = true
-                            target.slot = currentSlot
-                    end
-            end
+                target.y = event.y
+                target.onSlot = false
+                if target.slot then
+                    target.slot.isEmpty = true
+                    target.slot = nil
+                end
+                display.getCurrentStage():setFocus( event.target )
+                target.isMoving = true
+            elseif phase == "moved" then
+                if target.isMoving then
+                    target.x = event.x
+                    target.y = event.y		
+                end
+            elseif phase == "ended" then
+                local musicPopPlay = audio.play(musicPop, {channel = 2, loops = 0 })
+                local currentSlot = answerGroup
+                if target.x < (currentSlot.x + currentSlot.contentWidth * 0.5) and
+                    target.x > (currentSlot.x - currentSlot.contentWidth * 0.5) and
+                    target.y < (currentSlot.y + currentSlot.contentHeight * 0.5) and
+                    target.y > (currentSlot.y - currentSlot.contentHeight * 0.5) then
+                        if currentSlot.isEmpty then 
+                                currentAnswer = target.char
+                                currentSlot.isEmpty = false
+                                target.onSlot = true
+                                target.slot = currentSlot
+                        end
+                end
 
-            if currentSlot.isEmpty then
-                currentAnswer = ""
-                currentSlot.alpha = 0.5
-            else
-                currentSlot.alpha = 0
-            end
+                if currentSlot.isEmpty then
+                    currentAnswer = ""
+                    currentSlot.alpha = 0.5
+                else
+                    currentSlot.alpha = 0
+                end
 
-            if target.slot then
-                transition.to(target, {time = 200, x = target.slot.x, y = target.slot.y, xScale = 0.7, yScale = 0.7, 
-                    onStart = function() 
-                        dragEnabled = false 
-                    end, 
-                    onComplete = function() 
-                        dragEnabled = true 
-                    end})
-            else
-                transition.to(target, {time = 500, x = target.initX, y = target.initY, xScale = 0.9, yScale = 0.9, 
-                    onStart = function() 
-                        dragEnabled = false 
-                    end,
-                    onComplete = function() 
-                        dragEnabled = true 
-                    end})
+                if target.slot then
+                    transition.to(target, {time = 200, x = target.slot.x, y = target.slot.y, xScale = 0.7, yScale = 0.7, 
+                        onStart = function() 
+                            target.tapsEnabled = false 
+                        end, 
+                        onComplete = function() 
+                            target.tapsEnabled = true 
+                        end})
+                else
+                    transition.to(target, {time = 500, x = target.initX, y = target.initY, xScale = 0.9, yScale = 0.9, 
+                        onStart = function() 
+                            target.tapsEnabled = false 
+                        end,
+                        onComplete = function() 
+                            target.tapsEnabled = true 
+                        end})
+                end
+                display.getCurrentStage():setFocus( nil )
             end
-            display.getCurrentStage():setFocus( nil )
         end
     end
-
 end
 
 
@@ -249,6 +250,7 @@ local function createDynamicAnswers()
         local optionsY = display.viewableContentHeight * 0.85
         local options = display.newImage( "images/" .. imageOptions[indexAnswers] .. ".png" )
         options:scale(0, 0)
+        options.tapsEnabled = true
         options.y = optionsY
         options.x = optionsX
         options.initX = optionsX
